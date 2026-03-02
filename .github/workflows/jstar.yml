@@ -30,8 +30,8 @@ jobs:
           import sys
 
           m3u_file = "jiostar.m3u"
-          jio_worker = "https://zstar.pfy.workers.dev/"
-          hotstar_worker = "https://voot.vodep39240327.workers.dev?voot.m3u8"
+          jio_worker = "https://jtv.pfy.workers.dev"
+          hotstar_worker = "https://voot.vodep39240327.workers.dev?voot.m3u"
 
           try:
               # 1. Fetch Jio Cookie
