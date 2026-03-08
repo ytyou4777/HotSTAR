@@ -57,22 +57,22 @@
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
-#EXTHTTP:{"Cookie":"hdntl=exp=1773046632~acl=%2f*~id=181e2000425492b3649d04d8edd95a17~data=hdntl~hmac=f5ba825856d733875f94fd8635e36107c46cdcd870e35d0d8d5d86e884640c55","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-#https://livetv-push.hotstar.com/dash/live/2002464-b/sshd1livetvwv/master.mpd
+#EXTHTTP:{"Cookie":"hdntl=exp=1773046259~acl=*sshd1livetv*~id=6492b53c266835ec239d3edf1eb42cf8~data=hdntl~hmac=40a5aa4b3a7f7718ce76385e28da18b733a7b9129d42db78fb265788a174790b","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
+https://livetv-push.hotstar.com/dash/live/2002464-b/sshd1livetvwv/master.mpd
 
 #EXTINF:-1 tvg-id="Star Sports Hindi 1 HD" tvg-logo="https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/1-by-xfireflix.png" group-title="T20I World Cup",Star Sports Hindi 1 HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
-#EXTHTTP:{"Cookie":"hdntl=exp=1773046632~acl=%2f*~id=181e2000425492b3649d04d8edd95a17~data=hdntl~hmac=f5ba825856d733875f94fd8635e36107c46cdcd870e35d0d8d5d86e884640c55","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-#https://livetv-push.hotstar.com/dash/live/2002466-b/sshindiwv/master.mpd
+#EXTHTTP:{"Cookie":"hdntl=exp=1773046379~acl=*sshindi*~id=57034cd220241433f1befddcefa07ece~data=hdntl~hmac=2c0a53f0f0f838a5830dad6122b15a4280e6630d55d97edcf419cb9b611c81bf","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
+https://livetv-push.hotstar.com/dash/live/2002466-b/sshindiwv/master.mpd
 
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_1920/sources/r1/cms/prod/7432/567432-h" group-title="T20I World Cup",Star Sports HD2
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
-#EXTHTTP:{"Cookie":"hdntl=exp=1773046632~acl=%2f*~id=181e2000425492b3649d04d8edd95a17~data=hdntl~hmac=f5ba825856d733875f94fd8635e36107c46cdcd870e35d0d8d5d86e884640c55","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-#https://livetv-push.hotstar.com/dash/live/2002465/sshd2livetvwv/master.mpd
+#EXTHTTP:{"Cookie":"hdntl=exp=1773046476~acl=*sshd2livetv*~id=890006a94fea2e0e5032a56970ae42ca~data=hdntl~hmac=c6ae271ca51ec62eab12f6ecf88401020976bebb5a92af5164b25b9e4387820e","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
+https://livetv-push.hotstar.com/dash/live/2002465/sshd2livetvwv/master.mpd
 
 
 
