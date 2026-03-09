@@ -21,10 +21,11 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Fetch and merge latest playlists
+      - name: Refresh tokens and update base URLs
         run: |
           python <<EOF
           import requests
+          import re
           import os
           import sys
 
@@ -41,35 +42,128 @@ jobs:
                   print(f"Error fetching {url}: {e}")
                   return None
 
-          def merge_playlists(jio_lines, hs_lines):
-              merged = []
-              header_added = False
-              for lines in (jio_lines, hs_lines):
-                  if lines and lines[0].startswith("#EXTM3U"):
-                      if not header_added:
-                          merged.append(lines[0])
-                          header_added = True
-                      start = 1
+          def extract_path(url, domain_pattern):
+              """Extract the path part after the domain (including leading slash)."""
+              match = re.search(rf"{domain_pattern}(/[^\s?]*)", url)
+              return match.group(1) if match else None
+
+          def parse_remote_playlist(lines, domain_pattern):
+              """Build a dict: path -> (exthttp_line, url_line) from remote playlist."""
+              mapping = {}
+              i = 0
+              while i < len(lines):
+                  line = lines[i].strip()
+                  # Look for URL line
+                  if line.startswith("http") and domain_pattern in line:
+                      path = extract_path(line, domain_pattern)
+                      if path:
+                          # Check if previous line is #EXTHTTP
+                          exthttp = None
+                          if i > 0 and lines[i-1].strip().startswith("#EXTHTTP"):
+                              exthttp = lines[i-1].strip()
+                          mapping[path] = (exthttp, line)
+                  i += 1
+              return mapping
+
+          def update_local_file(local_lines, jio_mapping, hs_mapping):
+              new_lines = []
+              i = 0
+              while i < len(local_lines):
+                  line = local_lines[i].rstrip()
+                  # Case 1: line is a URL (possibly preceded by #EXTHTTP)
+                  if line.startswith("http") and ("cdn.jio.com" in line or "hotstar.com" in line):
+                      # Determine which mapping to use
+                      if "cdn.jio.com" in line:
+                          domain_pattern = r"cdn\.jio\.com"
+                          mapping = jio_mapping
+                      elif "hotstar.com" in line:
+                          domain_pattern = r"hotstar\.com"
+                          mapping = hs_mapping
+                      else:
+                          new_lines.append(line)
+                          i += 1
+                          continue
+
+                      path = extract_path(line, domain_pattern)
+                      if path and path in mapping:
+                          # Replace with remote version
+                          exthttp_new, url_new = mapping[path]
+                          if exthttp_new:
+                              new_lines.append(exthttp_new)
+                          new_lines.append(url_new)
+                      else:
+                          # No match: keep original
+                          # But we might still want to update token? Not possible without path match.
+                          new_lines.append(line)
+                      i += 1
+
+                  # Case 2: line is #EXTHTTP and next line is URL (handle as a pair)
+                  elif line.startswith("#EXTHTTP") and i+1 < len(local_lines) and local_lines[i+1].strip().startswith("http"):
+                      url_line = local_lines[i+1].strip()
+                      if "cdn.jio.com" in url_line or "hotstar.com" in url_line:
+                          if "cdn.jio.com" in url_line:
+                              domain_pattern = r"cdn\.jio\.com"
+                              mapping = jio_mapping
+                          else:
+                              domain_pattern = r"hotstar\.com"
+                              mapping = hs_mapping
+
+                          path = extract_path(url_line, domain_pattern)
+                          if path and path in mapping:
+                              exthttp_new, url_new = mapping[path]
+                              if exthttp_new:
+                                  new_lines.append(exthttp_new)
+                              else:
+                                  # Remote has no EXTHTTP, so we keep original EXTHTTP? Or omit?
+                                  # Usually remote has EXTHTTP, but if not, we can keep old or skip.
+                                  # We'll keep original EXTHTTP to avoid breaking.
+                                  new_lines.append(line)
+                              new_lines.append(url_new)
+                          else:
+                              # No match: keep both original lines
+                              new_lines.append(line)
+                              new_lines.append(url_line)
+                      else:
+                          # Not Jio/Hotstar, keep as is
+                          new_lines.append(line)
+                          new_lines.append(url_line)
+                      i += 2  # skip the URL line we already handled
+
+                  # Case 3: any other line
                   else:
-                      start = 0
-                  if lines:
-                      merged.extend(lines[start:])
-              return merged
+                      new_lines.append(line)
+                      i += 1
+
+              return new_lines
 
           def main():
-              jio = fetch_playlist(JIO_WORKER)
-              hs = fetch_playlist(HOTSTAR_WORKER)
+              # Fetch remote playlists
+              jio_raw = fetch_playlist(JIO_WORKER)
+              hs_raw = fetch_playlist(HOTSTAR_WORKER)
 
-              if jio is None or hs is None:
+              if jio_raw is None or hs_raw is None:
                   print("Failed to fetch one or both playlists. Exiting without changes.")
                   sys.exit(1)
 
-              combined = merge_playlists(jio, hs)
+              # Build mappings
+              jio_mapping = parse_remote_playlist(jio_raw, r"cdn\.jio\.com")
+              hs_mapping = parse_remote_playlist(hs_raw, r"hotstar\.com")
+
+              print(f"Found {len(jio_mapping)} Jio streams and {len(hs_mapping)} Hotstar streams in remote playlists.")
+
+              if not os.path.exists(M3U_FILE):
+                  print(f"Error: {M3U_FILE} not found")
+                  sys.exit(1)
+
+              with open(M3U_FILE, 'r', encoding='utf-8') as f:
+                  local_lines = f.readlines()
+
+              updated_lines = update_local_file(local_lines, jio_mapping, hs_mapping)
 
               with open(M3U_FILE, 'w', encoding='utf-8') as f:
-                  f.write("\n".join(combined))
+                  f.write("\n".join(updated_lines))
 
-              print(f"Successfully updated {M3U_FILE} with latest Jio and Hotstar links.")
+              print(f"Successfully updated {M3U_FILE} with latest links and tokens.")
 
           if __name__ == "__main__":
               main()
@@ -81,8 +175,8 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add jiostar.m3u
           if git diff --cached --quiet; then
-            echo "No changes detected (playlists are identical)"
+            echo "No changes detected (tokens and URLs are up-to-date)"
             exit 0
           fi
-          git commit -m "Automated update: refreshed Jio and Hotstar playlists"
+          git commit -m "Automated update: refreshed Jio and Hotstar links"
           git push
