@@ -2,7 +2,7 @@ name: Update JioStar Playlist
 
 on:
   schedule:
-    - cron: '0 */1 * * *'   # runs every hour
+    - cron: '*/10 * * * *'   # runs every hour
   workflow_dispatch:
 
 jobs:
