@@ -3,7 +3,7 @@
 
 # ======= CATEGORY: BUSINESS NEWS =======
 #
-#EXTINF:-1 tvg-id="1002" group-title="JIOTV+ | JIOTV+ | Business News" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/CNBC_Tv18_Prime_HD.png",CNBC Tv18 Prime HD
+#EXTINF:-1 tvg-id="1002" group-title="JIOTV+ | Business News" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/CNBC_Tv18_Prime_HD.png",CNBC Tv18 Prime HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=810f0869e10c537891203cc70315dd6d:b8f7d22abf86cf12444a848ed5dbec13
 #EXTVLCOPT:http-user-agent=@watch_clarity
