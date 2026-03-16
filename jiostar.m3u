@@ -64,21 +64,21 @@ https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773061106~acl=%2f*~id=2b47043209c820632580b00da93a18fc~data=hdntl~hmac=13857ee257932fcbd0d41b868480d9d6c93476c43c1b6319eb7db7baea3e561f","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://starlinksbywatchclarity.vercel.app/play?c=ss1
+https://livetv-push.hotstar.com/dash/live/2002464-b/sshd1livetvwv/master.mpd
 
 #EXTINF:-1 tvg-id="Star Sports Hindi 1 HD" tvg-logo="https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/1-by-xfireflix.png" group-title="  T20I World Cup",Star Sports Hindi 1 HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773061106~acl=%2f*~id=2b47043209c820632580b00da93a18fc~data=hdntl~hmac=13857ee257932fcbd0d41b868480d9d6c93476c43c1b6319eb7db7baea3e561f","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://starlinksbywatchclarity.vercel.app/play?c=sshindi
+https://livetv-push.hotstar.com/dash/live/2002466-b/sshindiwv/master.mpd
 
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_1920/sources/r1/cms/prod/7432/567432-h" group-title="  T20I World Cup",Star Sports HD2
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773061106~acl=%2f*~id=2b47043209c820632580b00da93a18fc~data=hdntl~hmac=13857ee257932fcbd0d41b868480d9d6c93476c43c1b6319eb7db7baea3e561f","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://starlinksbywatchclarity.vercel.app/play?c=ss2
+https://livetv-push.hotstar.com/dash/live/2002465-b/sshd2livetvwv/master.mpd
 
 
 
