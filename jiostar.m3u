@@ -11,12 +11,12 @@
 #EXTINF:-1 tvg-id="1106" group-title="  T20I World Cup" tvg-logo="https://pbs.twimg.com/media/G7vaGYkaMAIIECs.jpg",Hot✨-English 4K
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.11.24.0.4237 (Android/13)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://live11p.akt.hotstar-cdn.net/cmaf/live/2108387/inallow-icct20wc-2026/eng/1540062397/15mindvrm013a4e2de894204cfc98f4f64e2f73affc08march2026/master_a.m3u8
+#https://live11p.akt.hotstar-cdn.net/cmaf/live/2108387/inallow-icct20wc-2026/eng/1540062397/15mindvrm013a4e2de894204cfc98f4f64e2f73affc08march2026/master_a.m3u8
 
 #EXTINF:-1 tvg-id="1106" group-title="  T20I World Cup" tvg-logo="https://pbs.twimg.com/media/G7vaGYkaMAIIECs.jpg",Hot✨-Hindi 4K
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.11.24.0.4237 (Android/13)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://live12p.akt.hotstar-cdn.net/cmaf/live/2108404/inallow-icct20wc-2026/hin/1540062397/15mindvrm013a4e2de894204cfc98f4f64e2f73affc08march2026/master_a.m3u8
+#https://live12p.akt.hotstar-cdn.net/cmaf/live/2108404/inallow-icct20wc-2026/hin/1540062397/15mindvrm013a4e2de894204cfc98f4f64e2f73affc08march2026/master_a.m3u8
 
 #EXTINF:-1 tvg-id="1106" group-title="  T20I World Cup" tvg-logo="https://pbs.twimg.com/media/G7vaGYkaMAIIECs.jpg",Hot✨-Tamil
 #EXTHTTP:{"Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/","User-Agent":"Hotstar;in.startv.hotstar.links_macha_official(Android/15)","Telegram":"@watch_clarity","Creator":"@watch_clarity"}
@@ -46,7 +46,7 @@ https://live12p.akt.hotstar-cdn.net/cmaf/live/2108404/inallow-icct20wc-2026/hin/
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a" group-title="   T20I World Cup",PRIME HIN
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd
+#https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a" group-title="   T20I World Cup",PRIME ENG
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=03018e1facaf7f344fa3d7439c6fc5b2:48a92e8fc0c897a7b23044f4b86e544b
@@ -64,40 +64,40 @@ https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://livetv-push.hotstar.com/dash/live/2002464-b/sshd1livetvwv/master.mpd
+#https://livetv-push.hotstar.com/dash/live/2002464-b/sshd1livetvwv/master.mpd
 
 #EXTINF:-1 tvg-id="Star Sports Hindi 1 HD" tvg-logo="https://raw.githubusercontent.com/abusaeeidx/Tv-Channel-Logo/heads/main/CricHD/runded/1-by-xfireflix.png" group-title="  T20I World Cup",Star Sports Hindi 1 HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://livetv-push.hotstar.com/dash/live/2002466-b/sshindiwv/master.mpd
+#https://livetv-push.hotstar.com/dash/live/2002466-b/sshindiwv/master.mpd
 
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_1920/sources/r1/cms/prod/7432/567432-h" group-title="  T20I World Cup",Star Sports HD2
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://livetv-push.hotstar.com/dash/live/2002465-b/sshd2livetvwv/master.mpd
+#https://livetv-push.hotstar.com/dash/live/2002465-b/sshd2livetvwv/master.mpd
 
 
 
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a" group-title="   T20I World Cup",Star Sports 2 Hindi HD
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://jcevents.hotstar.com/bpk-tv/f0e3e64ae415771d8e460317ce97aa5e/Fallback/f0e3e64ae415771d8e460317ce97aa5e.m3u8
+#https://jcevents.hotstar.com/bpk-tv/f0e3e64ae415771d8e460317ce97aa5e/Fallback/f0e3e64ae415771d8e460317ce97aa5e.m3u8
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a" group-title="   T20I World Cup",Star Sports 2 Hindi
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://jcevents.hotstar.com/bpk-tv/2c7182c8e6a22cfa6ebc02bbc9ed6dd0/Fallback/2c7182c8e6a22cfa6ebc02bbc9ed6dd0.m3u8
+#https://jcevents.hotstar.com/bpk-tv/2c7182c8e6a22cfa6ebc02bbc9ed6dd0/Fallback/2c7182c8e6a22cfa6ebc02bbc9ed6dd0.m3u8
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a" group-title="   T20I World Cup",Star Sports 2 Telugu
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://jcevents.hotstar.com/bpk-tv/034d1fb94cae87294a06f4dc266084b9/Fallback/034d1fb94cae87294a06f4dc266084b9.m3u8
+#https://jcevents.hotstar.com/bpk-tv/034d1fb94cae87294a06f4dc266084b9/Fallback/034d1fb94cae87294a06f4dc266084b9.m3u8
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a" group-title="   T20I World Cup",Star Sports 2 Tamil
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
 #EXTHTTP:{"Cookie":"hdntl=exp=1773741797~acl=%2f*~id=38e3a8440b9a797381973ee27f1253d1~data=hdntl~hmac=7a11c5ac8180bb019a02678cc0f1985e621fd93a49dc8cbebc6c60499d0fbab3","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-https://jcevents.hotstar.com/bpk-tv/4db6f833701e78ae4443cb268020f03b/Fallback/4db6f833701e78ae4443cb268020f03b.m3u8
+#https://jcevents.hotstar.com/bpk-tv/4db6f833701e78ae4443cb268020f03b/Fallback/4db6f833701e78ae4443cb268020f03b.m3u8
 
 #EXTINF:-1 group-title="   T20I World Cup" tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/38-by-xfireflix.png",Willow HD
 #EXTVLCOPT:http-referrer=https://profamouslife.com/
