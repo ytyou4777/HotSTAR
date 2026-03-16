@@ -31,7 +31,7 @@ jobs:
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://ztv.pfy.workers.dev/"
-          hotstar_worker = "https://starlinksbywatchclarity.vercel.app/SONY.m3u"
+          hotstar_worker = "https://voot.vodep39240327.workers.dev/?voot.m3u"
 
           try:
               # 1. Fetch Jio Cookie
