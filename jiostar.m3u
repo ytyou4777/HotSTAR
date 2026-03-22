@@ -77,8 +77,8 @@
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
-#EXTHTTP:{"Cookie":"hdntl=exp=1774262728~acl=%2f*~id=5e2e4897a00b556120faa720fea190d5~data=hdntl~hmac=892725ba8897895e47ea8d9d751774bc8ad4c6c23d0a3285bca939c30daf1119","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
-#https://livetv-push.hotstar.com/dash/live/2002465-b/sshd2livetvwv/master.mpd
+#EXTHTTP:{"Cookie":"hdntl=exp=1774267243~acl=*sshd2livetv*~id=db45a43dc8dcb553ad2ec757f39c88de~data=hdntl~hmac=940a380f77d1100457ed708d420b572ad1a37cb062286927ff68b26789972351","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
+https://livetv-push.hotstar.com/dash/live/2002465-b/sshd2livetvwv/master.mpd
 
 
 
