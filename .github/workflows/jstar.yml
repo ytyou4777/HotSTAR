@@ -2,7 +2,7 @@ name: Update JioStar Playlist
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # every 5 minutes
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -28,108 +28,194 @@ jobs:
           import re
           import os
           import sys
+          from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jtv.m3u"
           hotstar_worker = "https://voot.vodep39240327.workers.dev/?voot.m3u"
 
-          try:
-              print("Fetching tokens...")
-
-              # ================= JIO TOKEN =================
-              jio_token = None
+          # ------------------------------------------------------------
+          # Helper: parse a full m3u into a dict mapping identifier -> url
+          # identifier is either tvg-id (if exists) or the channel name
+          # ------------------------------------------------------------
+          def parse_remote_m3u(url):
               try:
-                  jio_res = requests.get(jio_worker, timeout=15)
-                  jio_match = re.search(r'__hdnea__=([^"\'\s&]+)', jio_res.text)
-                  if jio_match:
-                      jio_token = f"__hdnea__={jio_match.group(1)}"
-                      print("Jio token fetched")
-                  else:
-                      print("Jio token not found")
+                  resp = requests.get(url, timeout=20)
+                  resp.raise_for_status()
+                  lines = resp.text.splitlines()
               except Exception as e:
-                  print(f"Jio fetch error: {e}")
+                  print(f"Failed to fetch {url}: {e}")
+                  return {}
 
-              # ================= HOTSTAR TOKEN =================
-              hs_token = None
-              try:
-                  hs_res = requests.get(hotstar_worker, timeout=20)
-                  hs_match = re.search(r'hdntl=exp=[^&"\'\s]+', hs_res.text)
-                  if hs_match:
-                      hs_token = hs_match.group(0)
-                      print("Hotstar token fetched")
-                  else:
-                      print("Hotstar token not found")
-              except Exception as e:
-                  print(f"Hotstar fetch error: {e}")
-
-              # ================= FILE CHECK =================
-              if not os.path.exists(m3u_file):
-                  print(f"Error: {m3u_file} not found")
-                  sys.exit(1)
-
-              with open(m3u_file, 'r', encoding='utf-8') as f:
-                  lines = f.readlines()
-
-              updated_lines = []
-              jio_updates = 0
-              hotstar_updates = 0
-
+              mapping = {}
+              current_info = {}
               for line in lines:
-                  stripped = line.strip()
+                  line = line.strip()
+                  if line.startswith('#EXTINF'):
+                      # extract tvg-id and name
+                      tvg_id = re.search(r'tvg-id="([^"]+)"', line)
+                      # extract the name after the last comma
+                      name = line.split(',')[-1].strip()
+                      if tvg_id:
+                          current_info['id'] = tvg_id.group(1)
+                      else:
+                          current_info['id'] = name
+                  elif line and not line.startswith('#'):
+                      # this is the URL line
+                      url = line
+                      if current_info.get('id'):
+                          mapping[current_info['id']] = url
+                      current_info = {}  # reset
+              return mapping
 
-                  # keep empty lines
-                  if not stripped:
-                      updated_lines.append(line)
+          # ------------------------------------------------------------
+          # Fetch remote channel -> URL mappings
+          # ------------------------------------------------------------
+          jio_mapping = parse_remote_m3u(jio_worker)
+          print(f"Loaded {len(jio_mapping)} Jio channel mappings")
+
+          hotstar_mapping = parse_remote_m3u(hotstar_worker)
+          print(f"Loaded {len(hotstar_mapping)} Hotstar channel mappings")
+
+          # ------------------------------------------------------------
+          # Fetch fresh tokens (still used as fallback)
+          # ------------------------------------------------------------
+          jio_token = None
+          try:
+              jio_res = requests.get(jio_worker, timeout=15)
+              jio_match = re.search(r'__hdnea__=([^"\'\s&]+)', jio_res.text)
+              if jio_match:
+                  jio_token = f"__hdnea__={jio_match.group(1)}"
+                  print("Jio token fetched")
+          except Exception as e:
+              print(f"Jio token fetch error: {e}")
+
+          hs_token = None
+          try:
+              hs_res = requests.get(hotstar_worker, timeout=20)
+              hs_match = re.search(r'hdntl=exp=[^&"\'\s]+', hs_res.text)
+              if hs_match:
+                  hs_token = hs_match.group(0)
+                  print("Hotstar token fetched")
+          except Exception as e:
+              print(f"Hotstar token fetch error: {e}")
+
+          # ------------------------------------------------------------
+          # Read local playlist
+          # ------------------------------------------------------------
+          if not os.path.exists(m3u_file):
+              print(f"Error: {m3u_file} not found")
+              sys.exit(1)
+
+          with open(m3u_file, 'r', encoding='utf-8') as f:
+              lines = f.readlines()
+
+          updated_lines = []
+          jio_updates = 0
+          hotstar_updates = 0
+          url_replaced = 0
+
+          # We need to remember the last EXTINF line to know the channel id/name
+          last_extinf = None
+
+          for line in lines:
+              stripped = line.strip()
+
+              if not stripped:
+                  updated_lines.append(line)
+                  last_extinf = None
+                  continue
+
+              # Capture EXTINF info
+              if stripped.startswith('#EXTINF'):
+                  # Store tvg-id and channel name for the following URL
+                  tvg_id = re.search(r'tvg-id="([^"]+)"', stripped)
+                  name = stripped.split(',')[-1].strip() if ',' in stripped else ''
+                  last_extinf = {'tvg_id': tvg_id.group(1) if tvg_id else None, 'name': name}
+                  updated_lines.append(line)
+                  continue
+
+              # Handle URL lines (starting with http)
+              if stripped.startswith(('http://', 'https://')):
+                  # Check if this URL is for Jio or Hotstar
+                  is_jio = 'jio' in stripped.lower()
+                  is_hotstar = 'hotstar.com' in stripped.lower() or 'voot' in stripped.lower()
+
+                  # Try to replace the base URL using the mapping
+                  new_url = None
+                  if is_jio and last_extinf:
+                      # Try matching by tvg-id first, then by name
+                      identifier = last_extinf.get('tvg_id')
+                      if identifier and identifier in jio_mapping:
+                          new_url = jio_mapping[identifier]
+                      elif last_extinf.get('name') in jio_mapping:
+                          new_url = jio_mapping[last_extinf['name']]
+
+                  if is_hotstar and last_extinf:
+                      identifier = last_extinf.get('tvg_id')
+                      if identifier and identifier in hotstar_mapping:
+                          new_url = hotstar_mapping[identifier]
+                      elif last_extinf.get('name') in hotstar_mapping:
+                          new_url = hotstar_mapping[last_extinf['name']]
+
+                  if new_url:
+                      # Replace the entire URL, but preserve any existing token that might be embedded
+                      # We'll just use the new URL as is (it already contains the latest token)
+                      updated_lines.append(new_url + "\n")
+                      url_replaced += 1
+                      if is_jio:
+                          jio_updates += 1
+                      elif is_hotstar:
+                          hotstar_updates += 1
+                      last_extinf = None
                       continue
 
-                  # ================= HOTSTAR =================
-                  if hs_token:
-                      # Update Hotstar URLs (lines starting with http and containing hotstar.com or hdntl=)
-                      if stripped.startswith(('http://', 'https://')) and ('hotstar.com' in stripped or 'hdntl=' in stripped):
-                          updated_line = re.sub(r'hdntl=exp=[^&"\'\s]+', hs_token, stripped)
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
-                      # Update EXTHTTP cookie line containing hdntl=
-                      if stripped.startswith('#EXTHTTP') and 'hdntl=' in stripped:
-                          updated_line = re.sub(r'hdntl=exp=[^&"]+', hs_token, stripped)
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
+                  # If no mapping found, fall back to token-only update
+                  updated_url = stripped
+                  if is_jio and jio_token:
+                      if '__hdnea__=' in stripped:
+                          updated_url = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
+                      else:
+                          separator = '&' if '?' in stripped else '?'
+                          updated_url = stripped + separator + jio_token
+                      jio_updates += 1
+                  elif is_hotstar and hs_token:
+                      updated_url = re.sub(r'hdntl=exp=[^&"\'\s]+', hs_token, stripped)
+                      hotstar_updates += 1
 
-                  # ================= JIO =================
-                  if jio_token:
-                      # Update Jio URLs (lines starting with http and containing jio)
-                      if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
-                          if '__hdnea__=' in stripped:
-                              updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
-                          else:
-                              separator = '&' if '?' in stripped else '?'
-                              updated_line = stripped + separator + jio_token
-                          updated_lines.append(updated_line + "\n")
-                          jio_updates += 1
-                          continue
-                      # Update EXTHTTP cookie line containing __hdnea__
-                      if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
-                          updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
-                          updated_lines.append(updated_line + "\n")
-                          jio_updates += 1
-                          continue
+                  updated_lines.append(updated_url + "\n")
+                  last_extinf = None
+                  continue
 
-                  # ================= DEFAULT =================
-                  updated_lines.append(line)
+              # Handle #EXTHTTP cookie lines (direct token replacement)
+              if stripped.startswith('#EXTHTTP'):
+                  if jio_token and '__hdnea__=' in stripped:
+                      updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
+                      updated_lines.append(updated_line + "\n")
+                      jio_updates += 1
+                  elif hs_token and 'hdntl=' in stripped:
+                      updated_line = re.sub(r'hdntl=exp=[^&"]+', hs_token, stripped)
+                      updated_lines.append(updated_line + "\n")
+                      hotstar_updates += 1
+                  else:
+                      updated_lines.append(line)
+                  last_extinf = None
+                  continue
 
-              # ================= SAVE FILE =================
-              with open(m3u_file, 'w', encoding='utf-8') as f:
-                  f.writelines(updated_lines)
+              # All other lines (metadata, comments) just pass through
+              updated_lines.append(line)
+              last_extinf = None
 
-              print("✅ Update completed")
-              print(f"Jio links updated: {jio_updates}")
-              print(f"Hotstar links updated: {hotstar_updates}")
+          # ------------------------------------------------------------
+          # Save the updated playlist
+          # ------------------------------------------------------------
+          with open(m3u_file, 'w', encoding='utf-8') as f:
+              f.writelines(updated_lines)
 
-          except Exception as e:
-              print(f"Fatal Error: {e}")
-              sys.exit(1)
+          print("✅ Update completed")
+          print(f"Jio links updated (URL replaced or token refreshed): {jio_updates}")
+          print(f"Hotstar links updated: {hotstar_updates}")
+          print(f"Base URLs replaced (full link updated): {url_replaced}")
           EOF
 
       - name: Commit and push changes
@@ -141,5 +227,5 @@ jobs:
             echo "No changes detected"
             exit 0
           fi
-          git commit -m "Auto Update: Jio & Hotstar tokens refreshed"
+          git commit -m "Auto Update: Jio & Hotstar links refreshed (URL + tokens)"
           git push
