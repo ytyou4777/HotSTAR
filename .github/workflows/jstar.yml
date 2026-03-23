@@ -49,13 +49,14 @@ jobs:
               except Exception as e:
                   print(f"Jio fetch error: {e}")
 
-              # ================= HOTSTAR TOKEN =================
+              # ================= HOTSTAR TOKEN (full cookie) =================
               hs_token = None
               try:
                   hs_res = requests.get(hotstar_worker, timeout=20)
-                  hs_match = re.search(r'hdntl=exp=[^&"\'\s]+', hs_res.text)
+                  # Capture the entire "hdntl=..." cookie value (stops at quote, apostrophe, or space)
+                  hs_match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
                   if hs_match:
-                      hs_token = hs_match.group(0)
+                      hs_token = hs_match.group(0)   # e.g., "hdntl=exp=...~acl=...~id=...~data=...~hmac=..."
                       print("Hotstar token fetched")
                   else:
                       print("Hotstar token not found")
@@ -84,15 +85,25 @@ jobs:
 
                   # ================= HOTSTAR =================
                   if hs_token:
-                      # Update Hotstar URLs (lines starting with http and containing hotstar.com or hdntl=)
-                      if stripped.startswith(('http://', 'https://')) and ('hotstar.com' in stripped or 'hdntl=' in stripped):
-                          updated_line = re.sub(r'hdntl=exp=[^&"\'\s]+', hs_token, stripped)
+                      # 1. Lines with the pipe + Cookie="..." format
+                      if stripped.startswith(('http://', 'https://')) and '|Cookie=' in stripped:
+                          # Replace the cookie value inside the quotes
+                          updated_line = re.sub(r'(Cookie=")[^"]*(")', r'\1' + hs_token + r'\2', stripped)
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
                           continue
-                      # Update EXTHTTP cookie line containing hdntl=
+
+                      # 2. Regular URLs containing hotstar.com or hdntl= (e.g., query param)
+                      if stripped.startswith(('http://', 'https://')) and ('hotstar.com' in stripped or 'hdntl=' in stripped):
+                          # Replace the existing hdntl=... value (may be a full cookie or just exp=...)
+                          updated_line = re.sub(r'hdntl=[^&"\'\s]+', hs_token, stripped)
+                          updated_lines.append(updated_line + "\n")
+                          hotstar_updates += 1
+                          continue
+
+                      # 3. EXTHTTP lines containing hdntl=
                       if stripped.startswith('#EXTHTTP') and 'hdntl=' in stripped:
-                          updated_line = re.sub(r'hdntl=exp=[^&"]+', hs_token, stripped)
+                          updated_line = re.sub(r'hdntl=[^&"]+', hs_token, stripped)
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
                           continue
@@ -109,6 +120,7 @@ jobs:
                           updated_lines.append(updated_line + "\n")
                           jio_updates += 1
                           continue
+
                       # Update EXTHTTP cookie line containing __hdnea__
                       if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
                           updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
