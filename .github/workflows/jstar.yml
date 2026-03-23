@@ -30,7 +30,7 @@ jobs:
           import sys
 
           m3u_file = "jiostar.m3u"
-          jio_worker = "https://ztv.pfy.workers.dev/"
+          jio_worker = "https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jtv.m3u"
           hotstar_worker = "https://voot.vodep39240327.workers.dev/?voot.m3u"
 
           try:
@@ -83,26 +83,38 @@ jobs:
                       continue
 
                   # ================= HOTSTAR =================
-                  if hs_token and ("hotstar.com" in stripped or "hdntl=" in stripped):
-                      updated_line = re.sub(r'hdntl=exp=[^&"\'\s]+', hs_token, stripped)
-                      updated_lines.append(updated_line + "\n")
-                      hotstar_updates += 1
-                      continue
+                  if hs_token:
+                      # Update Hotstar URLs (lines starting with http and containing hotstar.com or hdntl=)
+                      if stripped.startswith(('http://', 'https://')) and ('hotstar.com' in stripped or 'hdntl=' in stripped):
+                          updated_line = re.sub(r'hdntl=exp=[^&"\'\s]+', hs_token, stripped)
+                          updated_lines.append(updated_line + "\n")
+                          hotstar_updates += 1
+                          continue
+                      # Update EXTHTTP cookie line containing hdntl=
+                      if stripped.startswith('#EXTHTTP') and 'hdntl=' in stripped:
+                          updated_line = re.sub(r'hdntl=exp=[^&"]+', hs_token, stripped)
+                          updated_lines.append(updated_line + "\n")
+                          hotstar_updates += 1
+                          continue
 
-                  # ================= JIO (DYNAMIC) =================
-                  if "jio" in stripped.lower():
-                      if jio_token:
-                          if "__hdnea__=" in stripped:
+                  # ================= JIO =================
+                  if jio_token:
+                      # Update Jio URLs (lines starting with http and containing jio)
+                      if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
+                          if '__hdnea__=' in stripped:
                               updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
                           else:
                               separator = '&' if '?' in stripped else '?'
                               updated_line = stripped + separator + jio_token
                           updated_lines.append(updated_line + "\n")
                           jio_updates += 1
-                      else:
-                          clean_link = re.sub(r'([?&])__hdnea__=[^&]*', '', stripped)
-                          updated_lines.append(clean_link + "\n")
-                      continue
+                          continue
+                      # Update EXTHTTP cookie line containing __hdnea__
+                      if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
+                          updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
+                          updated_lines.append(updated_line + "\n")
+                          jio_updates += 1
+                          continue
 
                   # ================= DEFAULT =================
                   updated_lines.append(line)
