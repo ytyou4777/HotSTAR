@@ -30,6 +30,10 @@ jobs:
           import sys
 
           m3u_file = "jiostar.m3u"
+
+          # ✅ FORCE CORRECT DOMAIN (MAIN FIX)
+          FORCE_JIO_DOMAIN = "jiotvbpkmob.cdn.jio.com"
+
           jio_worker = "https://jtv.pfy.workers.dev/"
           hotstar_worker = "https://voot.vodep39240327.workers.dev/?voot.m3u"
 
@@ -44,6 +48,8 @@ jobs:
                   if match:
                       jio_token = "__hdnea__=" + match.group(1)
                       print("Jio token fetched")
+                  else:
+                      print("Jio token not found")
               except Exception as e:
                   print("Jio error:", e)
 
@@ -55,6 +61,8 @@ jobs:
                   if match:
                       hs_token = match.group(0)
                       print("Hotstar token fetched")
+                  else:
+                      print("Hotstar token not found")
               except Exception as e:
                   print("Hotstar error:", e)
 
@@ -68,19 +76,10 @@ jobs:
 
               updated = []
 
-              # ===== AUTO DETECT LATEST JIO DOMAIN =====
-              latest_domain = None
-              for l in lines:
-                  m = re.search(r'https://([^/]+\.cdn\.jio\.com)', l)
-                  if m:
-                      latest_domain = m.group(1)
-                      break
-
-              print("Detected domain:", latest_domain)
-
               for i in range(len(lines)):
                   line = lines[i].strip()
 
+                  # keep empty lines
                   if not line:
                       updated.append(lines[i])
                       continue
@@ -119,14 +118,17 @@ jobs:
                       # ---- FIX URL ----
                       if "http" in line:
 
-                          # DOMAIN REPLACE (MAIN FIX)
-                          if latest_domain:
-                              line = re.sub(r'https://[^/]+\.cdn\.jio\.com', f'https://{latest_domain}', line)
+                          # 🔥 FORCE DOMAIN REPLACE
+                          line = re.sub(
+                              r'https://[^/]+\.cdn\.jio\.com',
+                              f'https://{FORCE_JIO_DOMAIN}',
+                              line
+                          )
 
-                          # REMOVE OLD TOKEN
+                          # remove old token
                           line = re.sub(r'([?&])__hdnea__=[^&]*', '', line)
 
-                          # ADD NEW TOKEN
+                          # add new token
                           if jio_token:
                               sep = '&' if '?' in line else '?'
                               line = line + sep + jio_token
@@ -137,11 +139,11 @@ jobs:
                   # ================= DEFAULT =================
                   updated.append(lines[i])
 
-              # ===== SAVE =====
+              # ===== SAVE FILE =====
               with open(m3u_file, "w", encoding="utf-8") as f:
                   f.writelines(updated)
 
-              print("✅ FULL FIX DONE")
+              print("✅ DONE - FULL FIX APPLIED")
 
           except Exception as e:
               print("Fatal Error:", e)
@@ -157,5 +159,5 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Auto Fix: Clean + Domain Sync + Token Update"
+          git commit -m "Auto Fix: Domain + Token + Clean Playlist"
           git push
