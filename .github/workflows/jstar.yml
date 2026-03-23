@@ -44,8 +44,6 @@ jobs:
                   if match:
                       jio_token = "__hdnea__=" + match.group(1)
                       print("Jio token fetched")
-                  else:
-                      print("Jio token not found")
               except Exception as e:
                   print("Jio error:", e)
 
@@ -57,8 +55,6 @@ jobs:
                   if match:
                       hs_token = match.group(0)
                       print("Hotstar token fetched")
-                  else:
-                      print("Hotstar token not found")
               except Exception as e:
                   print("Hotstar error:", e)
 
@@ -71,67 +67,61 @@ jobs:
                   lines = f.readlines()
 
               updated = []
-              jio_count = 0
-              hotstar_count = 0
 
-              for line in lines:
-                  stripped = line.strip()
+              for i in range(len(lines)):
+                  line = lines[i].strip()
 
-                  # keep empty
-                  if not stripped:
-                      updated.append(line)
+                  if not line:
+                      updated.append(lines[i])
                       continue
 
                   # ================= CLEAN NAME =================
-                  if "#EXTINF" in stripped and "__hdnea__" in stripped:
-                      clean = re.sub(r'\?__hdnea__=[^",]+', '', stripped)
+                  if "#EXTINF" in line:
+                      clean = re.sub(r'\?__hdnea__=[^",]+', '', line)
+                      clean = re.sub(r'hdntl=exp=[^",]+', '', clean)
                       updated.append(clean + "\n")
                       continue
 
                   # ================= HOTSTAR =================
-                  if hs_token and ("hotstar.com" in stripped or "hdntl=" in stripped):
-                      new = re.sub(r'hdntl=exp=[^&"\'\s]+', hs_token, stripped)
+                  if hs_token and ("hotstar" in line or "hdntl=" in line):
+                      new = re.sub(r'hdntl=exp=[^&"\s]+', hs_token, line)
                       updated.append(new + "\n")
-                      hotstar_count += 1
                       continue
 
                   # ================= JIO =================
-                  if "jio" in stripped.lower():
+                  if "cdn.jio.com" in line:
 
                       # FIX EXTHTTP
-                      if "#EXTHTTP" in stripped:
+                      if "#EXTHTTP" in line:
                           if jio_token:
-                              new = re.sub(r'__hdnea__=[^"}]+', jio_token, stripped)
+                              new = f'#EXTHTTP:{{"cookie":"{jio_token}"}}'
                           else:
-                              new = re.sub(r'__hdnea__=[^"}]+', '', stripped)
+                              new = '#EXTHTTP:{}'
                           updated.append(new + "\n")
                           continue
 
                       # FIX URL
-                      if "http" in stripped:
-                          if jio_token:
-                              if "__hdnea__=" in stripped:
-                                  new = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
-                              else:
-                                  sep = '&' if '?' in stripped else '?'
-                                  new = stripped + sep + jio_token
-                          else:
-                              new = re.sub(r'([?&])__hdnea__=[^&]*', '', stripped)
+                      if "http" in line:
 
-                          updated.append(new + "\n")
-                          jio_count += 1
+                          # remove old token
+                          line = re.sub(r'([?&])__hdnea__=[^&]*', '', line)
+
+                          # add new token
+                          if jio_token:
+                              sep = '&' if '?' in line else '?'
+                              line = line + sep + jio_token
+
+                          updated.append(line + "\n")
                           continue
 
                   # ================= DEFAULT =================
-                  updated.append(line)
+                  updated.append(lines[i])
 
               # ===== SAVE =====
               with open(m3u_file, "w", encoding="utf-8") as f:
                   f.writelines(updated)
 
-              print("✅ DONE")
-              print("Jio updated:", jio_count)
-              print("Hotstar updated:", hotstar_count)
+              print("✅ DONE (FULL FIX APPLIED)")
 
           except Exception as e:
               print("Fatal Error:", e)
@@ -147,5 +137,5 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Auto Update: Clean names + refresh tokens"
+          git commit -m "Auto Fix: Clean names + proper Jio tokens"
           git push
