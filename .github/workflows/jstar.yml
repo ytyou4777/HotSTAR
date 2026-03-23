@@ -68,6 +68,16 @@ jobs:
 
               updated = []
 
+              # ===== AUTO DETECT LATEST JIO DOMAIN =====
+              latest_domain = None
+              for l in lines:
+                  m = re.search(r'https://([^/]+\.cdn\.jio\.com)', l)
+                  if m:
+                      latest_domain = m.group(1)
+                      break
+
+              print("Detected domain:", latest_domain)
+
               for i in range(len(lines)):
                   line = lines[i].strip()
 
@@ -75,7 +85,13 @@ jobs:
                       updated.append(lines[i])
                       continue
 
-                  # ================= CLEAN NAME =================
+                  # ================= REMOVE TOKEN FROM ANY TEXT =================
+                  if "__hdnea__" in line and not line.startswith("#EXTHTTP") and not line.startswith("http"):
+                      clean = re.sub(r'\?__hdnea__=[^"\s]+', '', line)
+                      updated.append(clean + "\n")
+                      continue
+
+                  # ================= CLEAN EXTINF =================
                   if "#EXTINF" in line:
                       clean = re.sub(r'\?__hdnea__=[^",]+', '', line)
                       clean = re.sub(r'hdntl=exp=[^",]+', '', clean)
@@ -91,7 +107,7 @@ jobs:
                   # ================= JIO =================
                   if "cdn.jio.com" in line:
 
-                      # FIX EXTHTTP
+                      # ---- FIX EXTHTTP ----
                       if "#EXTHTTP" in line:
                           if jio_token:
                               new = f'#EXTHTTP:{{"cookie":"{jio_token}"}}'
@@ -100,13 +116,17 @@ jobs:
                           updated.append(new + "\n")
                           continue
 
-                      # FIX URL
+                      # ---- FIX URL ----
                       if "http" in line:
 
-                          # remove old token
+                          # DOMAIN REPLACE (MAIN FIX)
+                          if latest_domain:
+                              line = re.sub(r'https://[^/]+\.cdn\.jio\.com', f'https://{latest_domain}', line)
+
+                          # REMOVE OLD TOKEN
                           line = re.sub(r'([?&])__hdnea__=[^&]*', '', line)
 
-                          # add new token
+                          # ADD NEW TOKEN
                           if jio_token:
                               sep = '&' if '?' in line else '?'
                               line = line + sep + jio_token
@@ -121,7 +141,7 @@ jobs:
               with open(m3u_file, "w", encoding="utf-8") as f:
                   f.writelines(updated)
 
-              print("✅ DONE (FULL FIX APPLIED)")
+              print("✅ FULL FIX DONE")
 
           except Exception as e:
               print("Fatal Error:", e)
@@ -137,5 +157,5 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Auto Fix: Clean names + proper Jio tokens"
+          git commit -m "Auto Fix: Clean + Domain Sync + Token Update"
           git push
