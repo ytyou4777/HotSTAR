@@ -30,7 +30,7 @@ jobs:
           import sys
 
           m3u_file = "jiostar.m3u"
-          jio_worker = "https://raw.githubusercontent.com/alex4528x/m3u/refs/heads/main/jstar.m3u"
+          jio_worker = "https://raw.githubusercontent.com/Sflex0719/ZioGarmTara/main/ZioGarmTara.m3u"
           hotstar_worker = "https://voot.vodep39240327.workers.dev/?voot.m3u"
 
           try:
