@@ -49,14 +49,13 @@ jobs:
               except Exception as e:
                   print(f"Jio fetch error: {e}")
 
-              # ================= HOTSTAR TOKEN (full cookie) =================
+              # ================= HOTSTAR TOKEN =================
               hs_token = None
               try:
                   hs_res = requests.get(hotstar_worker, timeout=20)
-                  # Capture the entire "hdntl=..." cookie value (stops at quote, apostrophe, or space)
                   hs_match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
                   if hs_match:
-                      hs_token = hs_match.group(0)   # e.g., "hdntl=exp=...~acl=...~id=...~data=...~hmac=..."
+                      hs_token = hs_match.group(0)
                       print("Hotstar token fetched")
                   else:
                       print("Hotstar token not found")
@@ -78,30 +77,35 @@ jobs:
               for line in lines:
                   stripped = line.strip()
 
-                  # keep empty lines
                   if not stripped:
                       updated_lines.append(line)
                       continue
 
                   # ================= HOTSTAR =================
                   if hs_token:
-                      # 1. Lines with the pipe + Cookie="..." format
+
+                      # 1. Update existing Cookie
                       if stripped.startswith(('http://', 'https://')) and '|Cookie=' in stripped:
-                          # Replace the cookie value inside the quotes
                           updated_line = re.sub(r'(Cookie=")[^"]*(")', r'\1' + hs_token + r'\2', stripped)
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
                           continue
 
-                      # 2. Regular URLs containing hotstar.com or hdntl= (e.g., query param)
+                      # 2. ADD Cookie if missing
+                      if stripped.startswith(('http://', 'https://')) and 'hotstar.com' in stripped and '|Cookie=' not in stripped:
+                          updated_line = stripped + f'|Cookie="{hs_token}"'
+                          updated_lines.append(updated_line + "\n")
+                          hotstar_updates += 1
+                          continue
+
+                      # 3. Replace hdntl in URL
                       if stripped.startswith(('http://', 'https://')) and ('hotstar.com' in stripped or 'hdntl=' in stripped):
-                          # Replace the existing hdntl=... value (may be a full cookie or just exp=...)
                           updated_line = re.sub(r'hdntl=[^&"\'\s]+', hs_token, stripped)
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
                           continue
 
-                      # 3. EXTHTTP lines containing hdntl=
+                      # 4. EXTHTTP lines
                       if stripped.startswith('#EXTHTTP') and 'hdntl=' in stripped:
                           updated_line = re.sub(r'hdntl=[^&"]+', hs_token, stripped)
                           updated_lines.append(updated_line + "\n")
@@ -110,18 +114,18 @@ jobs:
 
                   # ================= JIO =================
                   if jio_token:
-                      # Update Jio URLs (lines starting with http and containing jio)
+
                       if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
                           if '__hdnea__=' in stripped:
                               updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
                           else:
                               separator = '&' if '?' in stripped else '?'
                               updated_line = stripped + separator + jio_token
+
                           updated_lines.append(updated_line + "\n")
                           jio_updates += 1
                           continue
 
-                      # Update EXTHTTP cookie line containing __hdnea__
                       if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
                           updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
                           updated_lines.append(updated_line + "\n")
@@ -131,13 +135,13 @@ jobs:
                   # ================= DEFAULT =================
                   updated_lines.append(line)
 
-              # ================= SAVE FILE =================
+              # ================= SAVE =================
               with open(m3u_file, 'w', encoding='utf-8') as f:
                   f.writelines(updated_lines)
 
               print("✅ Update completed")
-              print(f"Jio links updated: {jio_updates}")
-              print(f"Hotstar links updated: {hotstar_updates}")
+              print(f"Jio updated: {jio_updates}")
+              print(f"Hotstar updated: {hotstar_updates}")
 
           except Exception as e:
               print(f"Fatal Error: {e}")
