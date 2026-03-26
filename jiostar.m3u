@@ -111,21 +111,21 @@
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=965dc2ddb1d85138ad787999a7f30ca5:859695076e67fe961836b564db6d689c
 #EXTVLCOPT:http-user-agent=@watch_clarity
-#EXTHTTP:{"cookie":"__hdnea__=st=1774472438~exp=1774558838~acl=/*~hmac=56d2e996e4408c0d348ec4974f6e108feeca0fbdf38668d920b9f606f7858dab"}
+#EXTHTTP:{"cookie":"__hdnea__=st=1774497630~exp=1774584030~acl=/*~hmac=3e97138ec730a59538655d7773dfa78a0373fca9f82a17e87f068d951ada8fda"}
 #http://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_HD1_BTS/output/index.mpd
 
 #EXTINF:-1 tvg-id="1108" tvg-language="Hindi" group-title="   T20I World Cup" tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_384/sources/r1/cms/prod/8704/1764056908704-a",Star Sports 1 Hindi HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=400131994b445d8c8817202248760fda:2d56cb6f07a75b9aff165d534ae2bfc4
 #EXTVLCOPT:http-user-agent=@watch_clarity
-#EXTHTTP:{"cookie":"__hdnea__=st=1774472438~exp=1774558838~acl=/*~hmac=56d2e996e4408c0d348ec4974f6e108feeca0fbdf38668d920b9f606f7858dab"}
+#EXTHTTP:{"cookie":"__hdnea__=st=1774497630~exp=1774584030~acl=/*~hmac=3e97138ec730a59538655d7773dfa78a0373fca9f82a17e87f068d951ada8fda"}
 #http://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_HD1_Hindi_BTS/output/index.mpd
 
 #EXTINF:-1 tvg-id="1122" tvg-language="Kannada" group-title="  T20I World Cup" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Sports_2_Kannada.png",Star Sports 2 Kannada
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=7af2add2968a56309519ac2680c18f25:f992a14e0def17ccdfe16f58c4ce56c5
 #EXTVLCOPT:http-user-agent=@watch_clarity
-#EXTHTTP:{"cookie":"__hdnea__=st=1774472438~exp=1774558838~acl=/*~hmac=56d2e996e4408c0d348ec4974f6e108feeca0fbdf38668d920b9f606f7858dab"}
+#EXTHTTP:{"cookie":"__hdnea__=st=1774497630~exp=1774584030~acl=/*~hmac=3e97138ec730a59538655d7773dfa78a0373fca9f82a17e87f068d951ada8fda"}
 #http://jiotvmblive.cdn.jio.com/bpk-tv/Star_Sports_2_Kannada_BTS/output/index.mpd
 
 #EXTINF: -1 tvg-id="1301" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/TP4K_Thumbnail-v2/TP4K_Thumbnail.png" group-title="  T20I World Cup", Star 4K
