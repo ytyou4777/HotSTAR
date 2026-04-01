@@ -80,38 +80,6 @@ jobs:
                   if not stripped:
                       updated_lines.append(line)
                       continue
-
-                  # ================= HOTSTAR =================
-                  if hs_token:
-
-                      # 1. Update existing Cookie
-                      if stripped.startswith(('http://', 'https://')) and '|Cookie=' in stripped:
-                          updated_line = re.sub(r'(Cookie=")[^"]*(")', r'\1' + hs_token + r'\2', stripped)
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
-
-                      # 2. ADD Cookie if missing
-                      if stripped.startswith(('http://', 'https://')) and 'hotstar.com' in stripped and '|Cookie=' not in stripped:
-                          updated_line = stripped + f'|Cookie="{hs_token}"'
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
-
-                      # 3. Replace hdntl in URL
-                      if stripped.startswith(('http://', 'https://')) and ('hotstar.com' in stripped or 'hdntl=' in stripped):
-                          updated_line = re.sub(r'hdntl=[^&"\'\s]+', hs_token, stripped)
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
-
-                      # 4. EXTHTTP lines
-                      if stripped.startswith('#EXTHTTP') and 'hdntl=' in stripped:
-                          updated_line = re.sub(r'hdntl=[^&"]+', hs_token, stripped)
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
-
                   # ================= JIO =================
                   if jio_token:
 
