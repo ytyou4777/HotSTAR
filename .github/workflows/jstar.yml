@@ -31,7 +31,7 @@ jobs:
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://raw.githubusercontent.com/Sflex0719/ZioGarmTara/main/ZioGarmTara.m3u"
-          hotstar_worker = "https://voot.vodep39240327.workers.dev/?voot.m3u"
+          hotstar_worker = "https://netx.streamstar18.workers.dev/hot1"
 
           try:
               print("Fetching tokens...")
