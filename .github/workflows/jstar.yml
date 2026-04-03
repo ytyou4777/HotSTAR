@@ -54,24 +54,15 @@ jobs:
               try:
                   hs_res = requests.get(hotstar_worker, timeout=20)
 
-                  # Try JSON
-                  try:
-                      data = hs_res.json()
-                      for v in str(data).split():
-                          if "hdntl=" in v:
-                              hs_token = re.search(r'hdntl=[^&"]+', v).group(0)
-                              break
-                  except:
-                      pass
+                  match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
+                  if match:
+                      hs_token = match.group(0)
 
-                  # Fallback regex
-                  if not hs_token:
-                      match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
-                      if match:
-                          hs_token = match.group(0)
+                      # 🔥 CLEAN TOKEN (IMPORTANT)
+                      hs_token = hs_token.strip().rstrip(',"\'')
 
                   if hs_token:
-                      print("✅ Hotstar token fetched")
+                      print("✅ Hotstar token fetched:", hs_token)
                   else:
                       print("❌ Hotstar token not found")
 
@@ -123,12 +114,10 @@ jobs:
                       # ---- URL lines ----
                       if stripped.startswith(('http://', 'https://')) and 'hotstar' in stripped.lower():
 
-                          # remove old token
                           clean_url = re.sub(r'(\?|&)hdntl=[^&]+', '', stripped)
-                          clean_url = clean_url.rstrip('?&')
+                          clean_url = clean_url.rstrip('?&').strip()
 
-                          # add cookie format
-                          updated_line = f'{clean_url}|Cookie="{hs_token}"
+                          updated_line = f'{clean_url}|Cookie="{hs_token}"'
 
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
@@ -137,17 +126,20 @@ jobs:
                       # ---- EXTHTTP lines ----
                       if stripped.startswith('#EXTHTTP'):
 
-                          if 'hdntl=' in stripped:
-                              updated_line = re.sub(r'hdntl=[^"]+', hs_token, stripped)
+                          # 🔥 CLEAN garbage chars
+                          clean_line = stripped.replace("',", "").replace("'", "")
+
+                          if 'hdntl=' in clean_line:
+                              updated_line = re.sub(r'hdntl=[^"]+', hs_token, clean_line)
                           else:
-                              if '"Cookie":"' in stripped:
+                              if '"Cookie":"' in clean_line:
                                   updated_line = re.sub(
                                       r'"Cookie":"([^"]*)"',
                                       f'"Cookie":"\\1; {hs_token}"',
-                                      stripped
+                                      clean_line
                                   )
                               else:
-                                  updated_line = stripped.replace(
+                                  updated_line = clean_line.replace(
                                       '{',
                                       f'{{"Cookie":"{hs_token}",'
                                   )
