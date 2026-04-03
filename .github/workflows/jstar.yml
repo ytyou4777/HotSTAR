@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -31,7 +31,6 @@ jobs:
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://zio.vodep39240327.workers.dev"
-          hotstar_worker = "https://netx.streamstar18.workers.dev/hot1"
 
           try:
               print("Fetching tokens...")
@@ -40,29 +39,12 @@ jobs:
               jio_token = None
               try:
                   jio_res = requests.get(jio_worker, timeout=15)
-                  jio_match = re.search(r'__hdnea__=([^"\'\s&]+)', jio_res.text)
-                  if jio_match:
-                      jio_token = f"__hdnea__={jio_match.group(1)}"
+                  match = re.search(r'__hdnea__=([^"\'\s&]+)', jio_res.text)
+                  if match:
+                      jio_token = "__hdnea__=" + match.group(1)
                       print("✅ Jio token fetched")
               except Exception as e:
-                  print(f"Jio error: {e}")
-
-              # ================= HOTSTAR TOKEN =================
-              hs_token = None
-              try:
-                  hs_res = requests.get(hotstar_worker, timeout=20)
-
-                  match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
-                  if match:
-                      hs_token = match.group(0).strip().rstrip(',"\'')
-
-                  if hs_token:
-                      print("✅ Hotstar token fetched")
-                  else:
-                      print("❌ Hotstar token not found")
-
-              except Exception as e:
-                  print(f"Hotstar error: {e}")
+                  print("Jio error:", e)
 
               # ================= FILE =================
               if not os.path.exists(m3u_file):
@@ -74,7 +56,7 @@ jobs:
 
               updated_lines = []
               jio_updates = 0
-              hotstar_updates = 0
+              hotstar_fixed = 0
 
               for line in lines:
                   stripped = line.strip()
@@ -83,12 +65,18 @@ jobs:
                       updated_lines.append(line)
                       continue
 
-                  # ================= JIO =================
+                  # ================= JIO FIX =================
                   if jio_token and "jio" in stripped.lower():
 
-                      clean = re.sub(r'__hdnea__=[^&]+', '', stripped)
+                      clean = stripped
+
+                      # 🔥 REMOVE ALL OLD TOKENS
+                      clean = re.sub(r'(\?|&)__hdnea__=[^&]+', '', clean)
+
+                      # fix trailing symbols
                       clean = clean.rstrip('?&')
 
+                      # ✅ ADD ONLY ONE TOKEN
                       sep = '&' if '?' in clean else '?'
                       updated = clean + sep + jio_token
 
@@ -96,7 +84,7 @@ jobs:
                       jio_updates += 1
                       continue
 
-                  # ================= HOTSTAR (NO COOKIE) =================
+                  # ================= HOTSTAR CLEAN =================
                   if "hotstar" in stripped.lower():
 
                       clean = stripped
@@ -104,7 +92,7 @@ jobs:
                       # remove Cookie
                       clean = re.sub(r'\|Cookie="[^"]*"', '', clean)
 
-                      # remove hdntl from URL
+                      # remove hdntl
                       clean = re.sub(r'(\?|&)hdntl=[^&]+', '', clean)
 
                       # remove garbage
@@ -113,7 +101,7 @@ jobs:
                       clean = clean.rstrip('?&')
 
                       updated_lines.append(clean + "\n")
-                      hotstar_updates += 1
+                      hotstar_fixed += 1
                       continue
 
                   # ================= EXTHTTP FIX =================
@@ -121,11 +109,11 @@ jobs:
 
                       clean = stripped.replace("',", "").replace("'", "")
 
-                      if 'hdntl=' in clean:
-                          clean = re.sub(r'hdntl=[^"]+', '', clean)
+                      # remove both tokens
+                      clean = re.sub(r'__hdnea__=[^"]+', '', clean)
+                      clean = re.sub(r'hdntl=[^"]+', '', clean)
 
                       updated_lines.append(clean + "\n")
-                      hotstar_updates += 1
                       continue
 
                   # ================= DEFAULT =================
@@ -136,8 +124,8 @@ jobs:
                   f.writelines(updated_lines)
 
               print("✅ DONE")
-              print("Jio Updated:", jio_updates)
-              print("Hotstar Fixed:", hotstar_updates)
+              print("Jio Fixed:", jio_updates)
+              print("Hotstar Fixed:", hotstar_fixed)
 
           except Exception as e:
               print("Fatal:", e)
@@ -153,5 +141,5 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Final Fix: Clean Hotstar + Update Jio"
+          git commit -m "Final Fix: Jio Token Duplicate Removed + Hotstar Clean"
           git push
