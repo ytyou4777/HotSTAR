@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -44,10 +44,8 @@ jobs:
                   if jio_match:
                       jio_token = f"__hdnea__={jio_match.group(1)}"
                       print("✅ Jio token fetched")
-                  else:
-                      print("❌ Jio token not found")
               except Exception as e:
-                  print(f"Jio fetch error: {e}")
+                  print(f"Jio error: {e}")
 
               # ================= HOTSTAR TOKEN =================
               hs_token = None
@@ -56,25 +54,22 @@ jobs:
 
                   match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
                   if match:
-                      hs_token = match.group(0)
-
-                      # 🔥 CLEAN TOKEN (IMPORTANT)
-                      hs_token = hs_token.strip().rstrip(',"\'')
+                      hs_token = match.group(0).strip().rstrip(',"\'')
 
                   if hs_token:
-                      print("✅ Hotstar token fetched:", hs_token)
+                      print("✅ Hotstar token fetched")
                   else:
                       print("❌ Hotstar token not found")
 
               except Exception as e:
-                  print(f"Hotstar fetch error: {e}")
+                  print(f"Hotstar error: {e}")
 
-              # ================= FILE CHECK =================
+              # ================= FILE =================
               if not os.path.exists(m3u_file):
-                  print(f"Error: {m3u_file} not found")
+                  print("M3U file not found")
                   sys.exit(1)
 
-              with open(m3u_file, 'r', encoding='utf-8') as f:
+              with open(m3u_file, "r", encoding="utf-8") as f:
                   lines = f.readlines()
 
               updated_lines = []
@@ -89,89 +84,89 @@ jobs:
                       continue
 
                   # ================= JIO =================
-                  if jio_token:
-                      if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
+                  if jio_token and "jio" in stripped.lower():
 
-                          if '__hdnea__=' in stripped:
-                              updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
-                          else:
-                              sep = '&' if '?' in stripped else '?'
-                              updated_line = stripped + sep + jio_token
+                      clean = re.sub(r'__hdnea__=[^&]+', '', stripped)
+                      clean = clean.rstrip('?&')
 
-                          updated_lines.append(updated_line + "\n")
-                          jio_updates += 1
-                          continue
+                      sep = '&' if '?' in clean else '?'
+                      updated = clean + sep + jio_token
 
-                      if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
-                          updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
-                          updated_lines.append(updated_line + "\n")
-                          jio_updates += 1
-                          continue
+                      updated_lines.append(updated + "\n")
+                      jio_updates += 1
+                      continue
 
                   # ================= HOTSTAR =================
-                  if hs_token:
+                  if hs_token and "hotstar" in stripped.lower():
 
-                      # ---- URL lines ----
-                      if stripped.startswith(('http://', 'https://')) and 'hotstar' in stripped.lower():
+                      # 🔥 REMOVE EVERYTHING DIRTY
+                      clean = stripped
 
-                          clean_url = re.sub(r'(\?|&)hdntl=[^&]+', '', stripped)
-                          clean_url = clean_url.rstrip('?&').strip()
+                      # remove old cookie part
+                      clean = re.sub(r'\|Cookie="[^"]*"', '', clean)
 
-                          updated_line = f'{clean_url}|Cookie="{hs_token}"'
+                      # remove hdntl from URL
+                      clean = re.sub(r'(\?|&)hdntl=[^&]+', '', clean)
 
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
+                      # remove garbage chars
+                      clean = clean.replace("',", "").replace("'", "").strip()
+                      clean = clean.rstrip('?&')
 
-                      # ---- EXTHTTP lines ----
-                      if stripped.startswith('#EXTHTTP'):
+                      # ✅ ADD SINGLE CLEAN COOKIE
+                      updated = f'{clean}|Cookie="{hs_token}"'
 
-                          # 🔥 CLEAN garbage chars
-                          clean_line = stripped.replace("',", "").replace("'", "")
+                      updated_lines.append(updated + "\n")
+                      hotstar_updates += 1
+                      continue
 
-                          if 'hdntl=' in clean_line:
-                              updated_line = re.sub(r'hdntl=[^"]+', hs_token, clean_line)
+                  # ================= EXTHTTP =================
+                  if stripped.startswith("#EXTHTTP") and hs_token:
+
+                      clean = stripped.replace("',", "").replace("'", "")
+
+                      if 'hdntl=' in clean:
+                          updated = re.sub(r'hdntl=[^"]+', hs_token, clean)
+                      else:
+                          if '"Cookie":"' in clean:
+                              updated = re.sub(
+                                  r'"Cookie":"([^"]*)"',
+                                  f'"Cookie":"\\1; {hs_token}"',
+                                  clean
+                              )
                           else:
-                              if '"Cookie":"' in clean_line:
-                                  updated_line = re.sub(
-                                      r'"Cookie":"([^"]*)"',
-                                      f'"Cookie":"\\1; {hs_token}"',
-                                      clean_line
-                                  )
-                              else:
-                                  updated_line = clean_line.replace(
-                                      '{',
-                                      f'{{"Cookie":"{hs_token}",'
-                                  )
+                              updated = clean.replace(
+                                  "{",
+                                  f'{{"Cookie":"{hs_token}",'
+                              )
 
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
+                      updated_lines.append(updated + "\n")
+                      hotstar_updates += 1
+                      continue
 
                   # ================= DEFAULT =================
                   updated_lines.append(line)
 
               # ================= SAVE =================
-              with open(m3u_file, 'w', encoding='utf-8') as f:
+              with open(m3u_file, "w", encoding="utf-8") as f:
                   f.writelines(updated_lines)
 
-              print("✅ Update completed")
-              print(f"Jio updated: {jio_updates}")
-              print(f"Hotstar updated: {hotstar_updates}")
+              print("✅ DONE")
+              print("Jio:", jio_updates)
+              print("Hotstar:", hotstar_updates)
 
           except Exception as e:
-              print(f"Fatal Error: {e}")
+              print("Fatal:", e)
               sys.exit(1)
           EOF
 
-      - name: Commit and push changes
+      - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add jiostar.m3u
           if git diff --cached --quiet; then
-            echo "No changes detected"
+            echo "No changes"
             exit 0
           fi
-          git commit -m "Auto Update: Jio & Hotstar tokens refreshed"
+          git commit -m "Auto Fix Tokens"
           git push
