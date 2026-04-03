@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -28,7 +28,6 @@ jobs:
           import re
           import os
           import sys
-          import json
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://zio.vodep39240327.workers.dev"
@@ -55,30 +54,24 @@ jobs:
               try:
                   hs_res = requests.get(hotstar_worker, timeout=20)
 
-                  # Try JSON parse
+                  # Try JSON
                   try:
                       data = hs_res.json()
-
-                      # Case 1: direct token
-                      if isinstance(data, dict):
-                          for value in data.values():
-                              if isinstance(value, str) and "hdntl=" in value:
-                                  hs_token = re.search(r'hdntl=[^&"]+', value).group(0)
-                                  break
-
-                      print("Hotstar JSON parsed")
-
+                      for v in str(data).split():
+                          if "hdntl=" in v:
+                              hs_token = re.search(r'hdntl=[^&"]+', v).group(0)
+                              break
                   except:
-                      print("Hotstar not JSON, fallback regex")
+                      pass
 
                   # Fallback regex
                   if not hs_token:
-                      hs_match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
-                      if hs_match:
-                          hs_token = hs_match.group(0)
+                      match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
+                      if match:
+                          hs_token = match.group(0)
 
                   if hs_token:
-                      print("✅ Hotstar token fetched:", hs_token[:50])
+                      print("✅ Hotstar token fetched")
                   else:
                       print("❌ Hotstar token not found")
 
@@ -107,24 +100,57 @@ jobs:
                   # ================= JIO =================
                   if jio_token:
                       if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
+
                           if '__hdnea__=' in stripped:
                               updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
                           else:
-                              separator = '&' if '?' in stripped else '?'
-                              updated_line = stripped + separator + jio_token
+                              sep = '&' if '?' in stripped else '?'
+                              updated_line = stripped + sep + jio_token
 
+                          updated_lines.append(updated_line + "\n")
+                          jio_updates += 1
+                          continue
+
+                      if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
+                          updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
                           updated_lines.append(updated_line + "\n")
                           jio_updates += 1
                           continue
 
                   # ================= HOTSTAR =================
                   if hs_token:
+
+                      # ---- URL lines ----
                       if stripped.startswith(('http://', 'https://')) and 'hotstar' in stripped.lower():
+
+                          # remove old token
+                          clean_url = re.sub(r'(\?|&)hdntl=[^&]+', '', stripped)
+                          clean_url = clean_url.rstrip('?&')
+
+                          # add cookie format
+                          updated_line = f'{clean_url}|Cookie="{hs_token}"'
+
+                          updated_lines.append(updated_line + "\n")
+                          hotstar_updates += 1
+                          continue
+
+                      # ---- EXTHTTP lines ----
+                      if stripped.startswith('#EXTHTTP'):
+
                           if 'hdntl=' in stripped:
-                              updated_line = re.sub(r'hdntl=[^&]+', hs_token, stripped)
+                              updated_line = re.sub(r'hdntl=[^"]+', hs_token, stripped)
                           else:
-                              separator = '&' if '?' in stripped else '?'
-                              updated_line = stripped + separator + hs_token
+                              if '"Cookie":"' in stripped:
+                                  updated_line = re.sub(
+                                      r'"Cookie":"([^"]*)"',
+                                      f'"Cookie":"\\1; {hs_token}"',
+                                      stripped
+                                  )
+                              else:
+                                  updated_line = stripped.replace(
+                                      '{',
+                                      f'{{"Cookie":"{hs_token}",'
+                                  )
 
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
