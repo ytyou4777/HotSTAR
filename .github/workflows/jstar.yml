@@ -2,7 +2,7 @@ name: Update JioStar Playlist
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # every 5 minutes
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -28,6 +28,7 @@ jobs:
           import re
           import os
           import sys
+          import json
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://zio.vodep39240327.workers.dev"
@@ -43,9 +44,9 @@ jobs:
                   jio_match = re.search(r'__hdnea__=([^"\'\s&]+)', jio_res.text)
                   if jio_match:
                       jio_token = f"__hdnea__={jio_match.group(1)}"
-                      print("Jio token fetched")
+                      print("✅ Jio token fetched")
                   else:
-                      print("Jio token not found")
+                      print("❌ Jio token not found")
               except Exception as e:
                   print(f"Jio fetch error: {e}")
 
@@ -53,12 +54,34 @@ jobs:
               hs_token = None
               try:
                   hs_res = requests.get(hotstar_worker, timeout=20)
-                  hs_match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
-                  if hs_match:
-                      hs_token = hs_match.group(0)
-                      print("Hotstar token fetched")
+
+                  # Try JSON parse
+                  try:
+                      data = hs_res.json()
+
+                      # Case 1: direct token
+                      if isinstance(data, dict):
+                          for value in data.values():
+                              if isinstance(value, str) and "hdntl=" in value:
+                                  hs_token = re.search(r'hdntl=[^&"]+', value).group(0)
+                                  break
+
+                      print("Hotstar JSON parsed")
+
+                  except:
+                      print("Hotstar not JSON, fallback regex")
+
+                  # Fallback regex
+                  if not hs_token:
+                      hs_match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
+                      if hs_match:
+                          hs_token = hs_match.group(0)
+
+                  if hs_token:
+                      print("✅ Hotstar token fetched:", hs_token[:50])
                   else:
-                      print("Hotstar token not found")
+                      print("❌ Hotstar token not found")
+
               except Exception as e:
                   print(f"Hotstar fetch error: {e}")
 
@@ -80,9 +103,9 @@ jobs:
                   if not stripped:
                       updated_lines.append(line)
                       continue
+
                   # ================= JIO =================
                   if jio_token:
-
                       if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
                           if '__hdnea__=' in stripped:
                               updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
@@ -94,10 +117,17 @@ jobs:
                           jio_updates += 1
                           continue
 
-                      if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
-                          updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
+                  # ================= HOTSTAR =================
+                  if hs_token:
+                      if stripped.startswith(('http://', 'https://')) and 'hotstar' in stripped.lower():
+                          if 'hdntl=' in stripped:
+                              updated_line = re.sub(r'hdntl=[^&]+', hs_token, stripped)
+                          else:
+                              separator = '&' if '?' in stripped else '?'
+                              updated_line = stripped + separator + hs_token
+
                           updated_lines.append(updated_line + "\n")
-                          jio_updates += 1
+                          hotstar_updates += 1
                           continue
 
                   # ================= DEFAULT =================
