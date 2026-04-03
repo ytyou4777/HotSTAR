@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -65,18 +65,21 @@ jobs:
                       updated_lines.append(line)
                       continue
 
-                  # ================= JIO FIX =================
-                  if jio_token and "jio" in stripped.lower():
+                  # ================= JIO FIX (ONLY STREAM URL) =================
+                  if (
+                      jio_token and
+                      "jio" in stripped.lower() and
+                      (".m3u8" in stripped or ".mpd" in stripped)
+                  ):
 
                       clean = stripped
 
-                      # 🔥 REMOVE ALL OLD TOKENS
+                      # remove old tokens
                       clean = re.sub(r'(\?|&)__hdnea__=[^&]+', '', clean)
 
-                      # fix trailing symbols
                       clean = clean.rstrip('?&')
 
-                      # ✅ ADD ONLY ONE TOKEN
+                      # add only once
                       sep = '&' if '?' in clean else '?'
                       updated = clean + sep + jio_token
 
@@ -89,15 +92,10 @@ jobs:
 
                       clean = stripped
 
-                      # remove Cookie
                       clean = re.sub(r'\|Cookie="[^"]*"', '', clean)
-
-                      # remove hdntl
                       clean = re.sub(r'(\?|&)hdntl=[^&]+', '', clean)
 
-                      # remove garbage
                       clean = clean.replace("',", "").replace("'", "").strip()
-
                       clean = clean.rstrip('?&')
 
                       updated_lines.append(clean + "\n")
@@ -109,7 +107,6 @@ jobs:
 
                       clean = stripped.replace("',", "").replace("'", "")
 
-                      # remove both tokens
                       clean = re.sub(r'__hdnea__=[^"]+', '', clean)
                       clean = re.sub(r'hdntl=[^"]+', '', clean)
 
@@ -141,5 +138,5 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Final Fix: Jio Token Duplicate Removed + Hotstar Clean"
+          git commit -m "Final Fix: Jio only on streams + Hotstar clean"
           git push
