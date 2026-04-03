@@ -28,6 +28,7 @@ jobs:
           import re
           import os
           import sys
+          import json
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://zio.vodep39240327.workers.dev"
@@ -54,15 +55,30 @@ jobs:
               try:
                   hs_res = requests.get(hotstar_worker, timeout=20)
 
-                  match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
-                  if match:
-                      hs_token = match.group(0)
+                  # Try JSON parse
+                  try:
+                      data = hs_res.json()
 
-                      # 🔥 CLEAN TOKEN (IMPORTANT)
-                      hs_token = hs_token.strip().rstrip(',"\'')
+                      # Case 1: direct token
+                      if isinstance(data, dict):
+                          for value in data.values():
+                              if isinstance(value, str) and "hdntl=" in value:
+                                  hs_token = re.search(r'hdntl=[^&"]+', value).group(0)
+                                  break
+
+                      print("Hotstar JSON parsed")
+
+                  except:
+                      print("Hotstar not JSON, fallback regex")
+
+                  # Fallback regex
+                  if not hs_token:
+                      hs_match = re.search(r'hdntl=[^"\'\s]+', hs_res.text)
+                      if hs_match:
+                          hs_token = hs_match.group(0)
 
                   if hs_token:
-                      print("✅ Hotstar token fetched:", hs_token)
+                      print("✅ Hotstar token fetched:", hs_token[:50])
                   else:
                       print("❌ Hotstar token not found")
 
@@ -91,56 +107,24 @@ jobs:
                   # ================= JIO =================
                   if jio_token:
                       if stripped.startswith(('http://', 'https://')) and 'jio' in stripped.lower():
-
                           if '__hdnea__=' in stripped:
                               updated_line = re.sub(r'__hdnea__=[^&]+', jio_token, stripped)
                           else:
-                              sep = '&' if '?' in stripped else '?'
-                              updated_line = stripped + sep + jio_token
+                              separator = '&' if '?' in stripped else '?'
+                              updated_line = stripped + separator + jio_token
 
-                          updated_lines.append(updated_line + "\n")
-                          jio_updates += 1
-                          continue
-
-                      if stripped.startswith('#EXTHTTP') and '__hdnea__=' in stripped:
-                          updated_line = re.sub(r'__hdnea__=[^&"]+', jio_token, stripped)
                           updated_lines.append(updated_line + "\n")
                           jio_updates += 1
                           continue
 
                   # ================= HOTSTAR =================
                   if hs_token:
-
-                      # ---- URL lines ----
                       if stripped.startswith(('http://', 'https://')) and 'hotstar' in stripped.lower():
-
-                          clean_url = re.sub(r'(\?|&)hdntl=[^&]+', '', stripped)
-                          clean_url = clean_url.rstrip('?&').strip()
-
-                          updated_lines.append(updated_line + "\n")
-                          hotstar_updates += 1
-                          continue
-
-                      # ---- EXTHTTP lines ----
-                      if stripped.startswith('#EXTHTTP'):
-
-                          # 🔥 CLEAN garbage chars
-                          clean_line = stripped.replace("',", "").replace("'", "")
-
-                          if 'hdntl=' in clean_line:
-                              updated_line = re.sub(r'hdntl=[^"]+', hs_token, clean_line)
+                          if 'hdntl=' in stripped:
+                              updated_line = re.sub(r'hdntl=[^&]+', hs_token, stripped)
                           else:
-                              if '"Cookie":"' in clean_line:
-                                  updated_line = re.sub(
-                                      r'"Cookie":"([^"]*)"',
-                                      f'"Cookie":"\\1; {hs_token}"',
-                                      clean_line
-                                  )
-                              else:
-                                  updated_line = clean_line.replace(
-                                      '{',
-                                      f'{{"Cookie":"{hs_token}",'
-                                  )
+                              separator = '&' if '?' in stripped else '?'
+                              updated_line = stripped + separator + hs_token
 
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
