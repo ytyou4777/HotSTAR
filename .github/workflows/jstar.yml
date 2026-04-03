@@ -128,7 +128,7 @@ jobs:
                           clean_url = clean_url.rstrip('?&')
 
                           # add cookie format
-                          updated_line = f'{clean_url}|Cookie="{hs_token}"'
+                          updated_line = f'{clean_url}|Cookie="{hs_token}"
 
                           updated_lines.append(updated_line + "\n")
                           hotstar_updates += 1
