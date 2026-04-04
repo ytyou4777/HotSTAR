@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -31,6 +31,7 @@ jobs:
 
           m3u_file = "jiostar.m3u"
           jio_worker = "https://zio.vodep39240327.workers.dev"
+          hotstar_worker = "https://netx.streamstar18.workers.dev/hot1"
 
           try:
               print("Fetching tokens...")
@@ -38,13 +39,26 @@ jobs:
               # ================= JIO TOKEN =================
               jio_token = None
               try:
-                  jio_res = requests.get(jio_worker, timeout=15)
-                  match = re.search(r'__hdnea__=([^"\'\s&]+)', jio_res.text)
+                  res = requests.get(jio_worker, timeout=15)
+                  match = re.search(r'__hdnea__=([^"\'\s&]+)', res.text)
                   if match:
                       jio_token = "__hdnea__=" + match.group(1)
                       print("✅ Jio token fetched")
               except Exception as e:
                   print("Jio error:", e)
+
+              # ================= HOTSTAR TOKEN =================
+              hs_token = None
+              try:
+                  res = requests.get(hotstar_worker, timeout=20)
+                  match = re.search(r'hdntl=[^"\'\s]+', res.text)
+                  if match:
+                      hs_token = match.group(0).strip().rstrip(',"\'')
+
+                  if hs_token:
+                      print("✅ Hotstar token fetched")
+              except Exception as e:
+                  print("Hotstar error:", e)
 
               # ================= FILE =================
               if not os.path.exists(m3u_file):
@@ -56,7 +70,7 @@ jobs:
 
               updated_lines = []
               jio_updates = 0
-              hotstar_fixed = 0
+              hotstar_updates = 0
 
               for line in lines:
                   stripped = line.strip()
@@ -65,21 +79,16 @@ jobs:
                       updated_lines.append(line)
                       continue
 
-                  # ================= JIO FIX (ONLY STREAM URL) =================
+                  # ================= JIO (ONLY STREAM) =================
                   if (
                       jio_token and
                       "jio" in stripped.lower() and
                       (".m3u8" in stripped or ".mpd" in stripped)
                   ):
 
-                      clean = stripped
-
-                      # remove old tokens
-                      clean = re.sub(r'(\?|&)__hdnea__=[^&]+', '', clean)
-
+                      clean = re.sub(r'(\?|&)__hdnea__=[^&]+', '', stripped)
                       clean = clean.rstrip('?&')
 
-                      # add only once
                       sep = '&' if '?' in clean else '?'
                       updated = clean + sep + jio_token
 
@@ -87,19 +96,16 @@ jobs:
                       jio_updates += 1
                       continue
 
-                  # ================= HOTSTAR CLEAN =================
+                  # ================= HOTSTAR URL CLEAN =================
                   if "hotstar" in stripped.lower():
 
                       clean = stripped
-
                       clean = re.sub(r'\|Cookie="[^"]*"', '', clean)
                       clean = re.sub(r'(\?|&)hdntl=[^&]+', '', clean)
-
                       clean = clean.replace("',", "").replace("'", "").strip()
                       clean = clean.rstrip('?&')
 
                       updated_lines.append(clean + "\n")
-                      hotstar_fixed += 1
                       continue
 
                   # ================= EXTHTTP FIX =================
@@ -107,10 +113,23 @@ jobs:
 
                       clean = stripped.replace("',", "").replace("'", "")
 
+                      # remove old tokens
                       clean = re.sub(r'__hdnea__=[^"]+', '', clean)
                       clean = re.sub(r'hdntl=[^"]+', '', clean)
 
-                      updated_lines.append(clean + "\n")
+                      # detect type
+                      if "hotstar" in clean.lower() and hs_token:
+                          updated = f'#EXTHTTP:{{"Cookie":"{hs_token}"}}'
+                          hotstar_updates += 1
+
+                      elif "jio" in clean.lower() and jio_token:
+                          updated = f'#EXTHTTP:{{"Cookie":"{jio_token}"}}'
+                          jio_updates += 1
+
+                      else:
+                          updated = '#EXTHTTP:{}'
+
+                      updated_lines.append(updated + "\n")
                       continue
 
                   # ================= DEFAULT =================
@@ -121,8 +140,8 @@ jobs:
                   f.writelines(updated_lines)
 
               print("✅ DONE")
-              print("Jio Fixed:", jio_updates)
-              print("Hotstar Fixed:", hotstar_fixed)
+              print("Jio Updated:", jio_updates)
+              print("Hotstar Updated:", hotstar_updates)
 
           except Exception as e:
               print("Fatal:", e)
@@ -138,5 +157,5 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Final Fix: Jio only on streams + Hotstar clean"
+          git commit -m "Final Fix: Jio + Hotstar + EXTHTTP Clean"
           git push
