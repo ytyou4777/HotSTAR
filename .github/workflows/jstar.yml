@@ -24,7 +24,7 @@ jobs:
           import requests, re, os, sys
 
           file = "jiostar.m3u"
-          jio_worker = "https://zio.vodep39240327.workers.dev"
+          jio_worker = "https://netx.streamstar18.workers.dev/zio1"
           hotstar_worker = "https://netx.streamstar18.workers.dev/hot1"
 
           # ================= TOKENS =================
