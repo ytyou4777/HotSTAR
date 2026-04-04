@@ -98,7 +98,7 @@ jobs:
 
                   # ===== HOTSTAR =====
                   elif hs_token and "hotstar" in clean.lower():
-                      exthttp = f'#EXTHTTP:{{"Cookie":"{hs_token}"}}'
+                      exthttp = f'#EXTHTTP:{{"Cookie":"{hs_token}","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}}'
 
                   # add EXTHTTP before URL
                   if exthttp:
