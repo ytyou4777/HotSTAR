@@ -69,9 +69,10 @@ https://livetv.hotstar.com/mp2/gec-india-1540065785/a00717b1324f45eb814eec9e48a1
 
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_1920/sources/r1/cms/prod/7435/567435-h" group-title="  Clarity TV | JioHotStar⭐" group-logo="https://clarity1-tv.vercel.app/IMG/JioStar.png",Star Sports Select HD1
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
+#KODIPROP:inputstream.adaptive.license_key=9dacc80134404c34ba184022c28d0000:982183fb4d9449c995859b7cff512092
 #EXTVLCOPT:http-user-agent=Hotstar;in.startv.hotstar/25.02.24.8.11169 (Android/15)
-#https://livetv-push.hotstar.com/dash/live/2002470-b/ssselecthd1wv/master.mpd
+#EXTHTTP:{"Cookie":"hdntl=exp=1775565471~acl=%2f*~id=1ecee9e475d608b5b1b01b9ffc0c7f0c~data=hdntl~hmac=3a62de1018bf596bc838d34ed6b2180a19f551a65acd58cf9f82a4df93a5bd54","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}
+https://livetv.hotstar.com/mp2/gec-india-1540065785/a00717b1324f45eb814eec9e48a12db8/index.mpd
 #EXTINF:-1 tvg-logo="https://img10.hotstar.com/image/upload/f_auto,q_90,w_1920/sources/r1/cms/prod/7437/567437-h" group-title="  Clarity TV | JioHotStar⭐" group-logo="https://clarity1-tv.vercel.app/IMG/JioStar.png",Star Sports Select HD2
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=fe7718fbb3fb4ba78c07cc0f578744e6:624e24b1843b459fab0a949609416f0d
