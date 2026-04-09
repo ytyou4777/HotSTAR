@@ -33,7 +33,7 @@ jobs:
               r = requests.get(hotstar_worker, timeout=20)
 
               # Better regex (fix empty issue)
-              m = re.search(r'hdntl=[^\\s"\\\']+', r.text)
+              m = re.search(r"hdntl=[^\s\"']+", r.text)
 
               if m:
                   hs_token = m.group(0).strip().rstrip(',"\'')
