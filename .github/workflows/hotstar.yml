@@ -1,0 +1,115 @@
+name: Update Hotstar Playlist
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update-playlist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - run: pip install requests
+
+      - name: Process Playlist (Hotstar Only)
+        run: |
+          python <<EOF
+          import requests, re, os, sys
+
+          file = "jiohotstar.m3u"
+          hotstar_worker = "https://netx.streamstar18.workers.dev/hot1"
+
+          # ================= HOTSTAR TOKEN =================
+          hs_token = None
+
+          try:
+              r = requests.get(hotstar_worker, timeout=20)
+
+              # Better regex (fix empty issue)
+              m = re.search(r'hdntl=[^\\s"\\\']+', r.text)
+
+              if m:
+                  hs_token = m.group(0).strip().rstrip(',"\'')
+                  print("✅ Hotstar Token OK:", hs_token)
+              else:
+                  print("❌ Token not found in response")
+          except Exception as e:
+              print("❌ Hotstar Fetch Error:", e)
+
+          if not hs_token:
+              print("❌ No Hotstar token → stopping to avoid empty EXTHTTP")
+              sys.exit(1)
+
+          if not os.path.exists(file):
+              print("❌ Playlist file not found")
+              sys.exit(1)
+
+          with open(file, "r", encoding="utf-8") as f:
+              lines = f.readlines()
+
+          new_lines = []
+
+          for line in lines:
+              s = line.strip()
+
+              if not s:
+                  new_lines.append(line)
+                  continue
+
+              # remove old EXTHTTP
+              if s.startswith("#EXTHTTP"):
+                  continue
+
+              # keep EXTINF
+              if s.startswith("#EXTINF"):
+                  new_lines.append(line)
+                  continue
+
+              # ================= URL =================
+              if s.startswith("http"):
+
+                  clean = s
+
+                  # remove old garbage
+                  clean = re.sub(r'\|Cookie="[^"]*"', '', clean)
+                  clean = re.sub(r'(\?|&)hdntl=[^&]+', '', clean)
+                  clean = clean.replace("',", "").replace("'", "").strip()
+                  clean = clean.rstrip('?&')
+
+                  exthttp = ""
+
+                  # ===== HOTSTAR ONLY =====
+                  if "hotstar" in clean.lower():
+                      exthttp = f'#EXTHTTP:{{"Cookie":"{hs_token}","Origin":"https://www.hotstar.com","Referer":"https://www.hotstar.com/"}}'
+
+                  # add EXTHTTP before URL
+                  if exthttp:
+                      new_lines.append(exthttp + "\n")
+
+                  new_lines.append(clean + "\n")
+                  continue
+
+              # default
+              new_lines.append(line)
+
+          # save
+          with open(file, "w", encoding="utf-8") as f:
+              f.writelines(new_lines)
+
+          print("🔥 HOTSTAR ONLY UPDATE DONE")
+          EOF
+
+      - name: Commit Changes
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "bot"
+          git add jiohotstar.m3u
+          git commit -m "Hotstar Token Auto Updated" || echo "No changes"
+          git push
